@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>添一笔</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="titlebar">
+      <div class="window-drag-region" aria-hidden="true"></div>
+      <div class="brand" title="Add a Line">
+        <span class="brand-mark"><i data-lucide="panel-right"></i></span>
+        <span>添一笔</span>
+      </div>
+      <input id="notebook-title" class="notebook-title" value="我的添一笔" aria-label="笔记本名称" maxlength="80">
+      <div class="save-state" id="save-state" aria-live="polite">
+        <span class="save-dot"></span><span>已保存</span>
+      </div>
+      <button id="always-on-top-button" class="icon-button" type="button" title="保持窗口置顶" aria-label="保持窗口置顶" aria-pressed="false"><i data-lucide="pin"></i></button>
+      <button id="settings-button" class="icon-button" type="button" title="设置" aria-label="设置"><i data-lucide="settings-2"></i></button>
+      <button id="hide-button" class="icon-button" type="button" title="隐藏添一笔" aria-label="隐藏添一笔"><i data-lucide="panel-right-close"></i></button>
+    </header>
+
+    <div class="command-bar">
+      <button id="add-pane" class="command-button primary-command" type="button"><i data-lucide="panel-top-open"></i><span>新建分栏</span></button>
+      <button id="open-files" class="command-button" type="button"><i data-lucide="folder-open"></i><span>打开文件</span></button>
+
+      <div class="menu-anchor sort-anchor">
+        <button id="sort-button" class="command-button" type="button" aria-haspopup="menu" aria-expanded="false"><i data-lucide="arrow-up-down"></i><span>排序</span><i data-lucide="chevron-down" class="chevron"></i></button>
+        <div id="sort-menu" class="popup-menu" role="menu" hidden>
+          <button type="button" data-sort="title-asc" role="menuitem"><i data-lucide="arrow-down-a-z"></i><span><strong>按题目名称</strong><small>升序：A 到 Z</small></span></button>
+          <button type="button" data-sort="title-desc" role="menuitem"><i data-lucide="arrow-up-z-a"></i><span><strong>按题目名称</strong><small>降序：Z 到 A</small></span></button>
+          <span class="menu-separator"></span>
+          <button type="button" data-sort="modified-desc" role="menuitem"><i data-lucide="clock-arrow-down"></i><span><strong>按修改时间</strong><small>降序：最近优先</small></span></button>
+          <button type="button" data-sort="modified-asc" role="menuitem"><i data-lucide="clock-arrow-up"></i><span><strong>按修改时间</strong><small>升序：最早优先</small></span></button>
+        </div>
+      </div>
+
+      <div class="segmented-control" id="layout-control" aria-label="分栏布局" role="radiogroup">
+        <button type="button" data-layout="horizontal" title="水平排列" aria-label="水平排列"><i data-lucide="columns-2"></i></button>
+        <button type="button" data-layout="vertical" title="垂直排列" aria-label="垂直排列"><i data-lucide="rows-2"></i></button>
+        <button type="button" data-layout="grid" title="矩阵排列" aria-label="矩阵排列"><i data-lucide="grid-2x2"></i></button>
+        <button type="button" data-layout="free" title="自由排列" aria-label="自由排列"><i data-lucide="move"></i></button>
+      </div>
+
+      <div id="column-stepper" class="column-stepper" hidden>
+        <button type="button" data-columns="-1" title="减少列数" aria-label="减少列数"><i data-lucide="minus"></i></button>
+        <span id="column-count">2 列</span>
+        <button type="button" data-columns="1" title="增加列数" aria-label="增加列数"><i data-lucide="plus"></i></button>
+      </div>
+
+    </div>
+
+    <div class="format-bar" aria-label="文字格式">
+      <button type="button" class="icon-button" data-command="undo" title="撤销" aria-label="撤销"><i data-lucide="undo-2"></i></button>
+      <button type="button" class="icon-button" data-command="redo" title="重做" aria-label="重做"><i data-lucide="redo-2"></i></button>
+      <button id="insert-image" type="button" class="icon-button" title="从文件插入图片" aria-label="从文件插入图片"><i data-lucide="image-plus"></i></button>
+      <span class="separator"></span>
+      <select id="block-format" title="段落样式" aria-label="段落样式">
+        <option value="p">正文</option>
+        <option value="h1">标题 1</option>
+        <option value="h2">标题 2</option>
+        <option value="h3">标题 3</option>
+        <option value="blockquote">引用</option>
+      </select>
+      <button type="button" class="format-symbol" data-command="bold" title="粗体" aria-label="粗体"><strong>B</strong></button>
+      <button type="button" class="format-symbol" data-command="italic" title="斜体" aria-label="斜体"><em>I</em></button>
+      <button type="button" class="format-symbol" data-command="underline" title="下划线" aria-label="下划线"><u>U</u></button>
+      <button type="button" class="format-symbol" data-command="strikeThrough" title="删除线" aria-label="删除线"><s>S</s></button>
+      <span class="separator"></span>
+      <button type="button" class="icon-button" data-command="insertUnorderedList" title="项目符号" aria-label="项目符号"><i data-lucide="list"></i></button>
+      <button type="button" class="icon-button" data-command="insertOrderedList" title="编号列表" aria-label="编号列表"><i data-lucide="list-ordered"></i></button>
+    </div>
+
+    <main id="workspace" class="workspace layout-vertical" aria-label="分栏笔记区"></main>
+  </div>
+
+  <dialog id="settings-dialog" class="settings-dialog">
+    <form method="dialog">
+      <header>
+        <div><h2>添一笔设置</h2></div>
+        <button class="icon-button" value="cancel" title="关闭" aria-label="关闭"><i data-lucide="x"></i></button>
+      </header>
+      <section class="settings-section">
+        <h3>窗口</h3>
+        <div class="setting-row">
+          <span><strong>呼出快捷键</strong><small id="shortcut-status">正在检测</small></span>
+          <div class="shortcut-controls">
+            <span class="shortcut-keys" aria-label="Control、Option、Z"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>Z</kbd></span>
+            <button id="shortcut-restart" class="icon-button" type="button" title="重新检测快捷键" aria-label="重新检测快捷键"><i data-lucide="refresh-cw"></i></button>
+          </div>
+        </div>
+        <label class="setting-row">
+          <span><strong>失去焦点时自动隐藏</strong></span>
+          <input id="auto-hide-setting" type="checkbox" role="switch">
+        </label>
+        <label class="setting-row">
+          <span><strong>登录时启动</strong></span>
+          <input id="login-item-setting" type="checkbox" role="switch">
+        </label>
+      </section>
+      <section class="settings-section">
+        <h3>编辑器</h3>
+        <label class="setting-row font-size-row">
+          <span><strong>正文字号</strong><small id="font-size-label">16 px</small></span>
+          <input id="font-size-setting" type="range" min="13" max="24" step="1" value="16">
+        </label>
+      </section>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden>
+    <i data-lucide="check-circle-2"></i><span id="toast-message"></span>
+    <button id="toast-action" type="button" hidden>在 Finder 中显示</button>
+  </div>
+
+  <template id="pane-template">
+    <article class="note-pane">
+      <header class="pane-header">
+        <button class="drag-handle icon-button" type="button" title="拖动分栏" aria-label="拖动分栏"><i data-lucide="grip-vertical"></i></button>
+        <div class="pane-title-wrap">
+          <input class="pane-title" aria-label="分栏名称" maxlength="80">
+          <i class="pane-pin-indicator" data-lucide="pin" aria-label="已置顶" hidden></i>
+        </div>
+        <div class="pane-header-blank" role="button" tabindex="0" title="双击最大化或还原分栏" aria-label="双击最大化或还原分栏"></div>
+        <span class="pane-meta">0 字</span>
+        <button class="pane-save-button pane-command-button" type="button" title="保存分栏" aria-label="保存分栏"><i data-lucide="save"></i><span>保存</span></button>
+        <button class="pane-remove-button pane-command-button" type="button" title="从界面移除分栏，不会删除源文件" aria-label="移除分栏，不删除源文件"><i data-lucide="panel-top-close"></i><span>移除</span></button>
+        <div class="menu-anchor">
+          <button class="pane-menu-button icon-button" type="button" title="更多分栏操作" aria-label="更多分栏操作" aria-haspopup="menu" aria-expanded="false"><i data-lucide="more-horizontal"></i></button>
+          <div class="popup-menu pane-menu" role="menu" hidden>
+            <button type="button" data-pane-action="pin"><i data-lucide="pin"></i><span class="pane-pin-label">置顶此栏</span></button>
+            <div class="pane-color-picker" role="group" aria-label="分栏颜色选择">
+              <div class="pane-color-label"><i data-lucide="tag"></i><span>分栏颜色</span></div>
+              <div class="pane-color-options">
+                <button type="button" class="color-clear" data-pane-color="none" title="取消颜色" aria-label="取消分栏颜色"><i data-lucide="x"></i></button>
+                <button type="button" class="color-swatch color-red" data-pane-color="red" title="红色" aria-label="红色"></button>
+                <button type="button" class="color-swatch color-orange" data-pane-color="orange" title="橙色" aria-label="橙色"></button>
+                <button type="button" class="color-swatch color-yellow" data-pane-color="yellow" title="黄色" aria-label="黄色"></button>
+                <button type="button" class="color-swatch color-green" data-pane-color="green" title="绿色" aria-label="绿色"></button>
+                <button type="button" class="color-swatch color-blue" data-pane-color="blue" title="蓝色" aria-label="蓝色"></button>
+                <button type="button" class="color-swatch color-indigo" data-pane-color="indigo" title="靛青色" aria-label="靛青色"></button>
+                <button type="button" class="color-swatch color-purple" data-pane-color="purple" title="紫色" aria-label="紫色"></button>
+              </div>
+            </div>
+            <span class="menu-separator"></span>
+            <button type="button" data-pane-action="print"><i data-lucide="printer"></i><span>打印此栏</span></button>
+            <button type="button" data-pane-action="markdown"><i data-lucide="file-text"></i><span>导出 Markdown</span></button>
+            <button type="button" data-pane-action="docx"><i data-lucide="file-type-2"></i><span>导出 Word</span></button>
+            <button type="button" data-pane-action="reveal-file" class="reveal-file-action" hidden><i data-lucide="folder-search-2"></i><span>在 Finder 中显示文件</span></button>
+            <button type="button" data-pane-action="duplicate"><i data-lucide="copy-plus"></i><span>复制分栏</span></button>
+          </div>
+        </div>
+      </header>
+      <div class="editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="开始记录…" spellcheck="true"></div>
+      <button class="resize-handle" type="button" title="调整分栏大小" aria-label="调整分栏大小"><i data-lucide="move-diagonal-2"></i></button>
+      <div class="image-tools" hidden>
+        <button type="button" data-image-width="40">小</button>
+        <button type="button" data-image-width="70">中</button>
+        <button type="button" data-image-width="100">宽</button>
+        <button type="button" data-image-delete title="删除图片" aria-label="删除图片"><i data-lucide="trash-2"></i></button>
+      </div>
+    </article>
+  </template>
+
+  <script src="../../node_modules/lucide/dist/umd/lucide.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
