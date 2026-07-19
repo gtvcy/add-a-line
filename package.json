@@ -1,0 +1,29 @@
+{
+  "name": "add-a-line",
+  "version": "1.6.0",
+  "description": "A low-friction notebook for work in progress on macOS",
+  "main": "src/main.cjs",
+  "author": "Add a Line",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.cjs",
+    "build:icons": "node scripts/generate-icon.cjs && bash scripts/build-icons.sh",
+    "package:mac": "npm run build:icons && electron-packager . \"Add a Line\" --platform=darwin --arch=arm64 --out=dist --overwrite --icon=assets/AppIcon.icns --app-bundle-id=com.tianyibi.addaline --app-version=1.6.0 --build-version=9 --extend-info=build/Info.plist --prune=true --ignore='^/(dist|tests|screenshots|native)$' && bash scripts/finalize-app.sh"
+  },
+  "dependencies": {
+    "docx": "^9.5.1",
+    "image-size": "^2.0.2",
+    "linkedom": "^0.18.12",
+    "lucide": "^0.544.0",
+    "mammoth": "^1.11.0",
+    "marked": "^15.0.12",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2"
+  },
+  "devDependencies": {
+    "@electron/packager": "^18.3.6",
+    "electron": "39.8.5",
+    "playwright-core": "^1.61.1"
+  }
+}
